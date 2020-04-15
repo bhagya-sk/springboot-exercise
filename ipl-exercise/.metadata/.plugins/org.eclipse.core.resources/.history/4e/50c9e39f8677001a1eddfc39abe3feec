@@ -1,0 +1,20 @@
+package com.reactiveworks.ipl;
+
+public class A {
+	
+	private int aId;
+	private int abc;
+	public int getaId() {
+		return aId;
+	}
+	public void setaId(int aId) {
+		this.aId = aId;
+	}
+	public int getAbc() {
+		return abc;
+	}
+	public void setAbc(int abc) {
+		this.abc = abc;
+	}
+	
+}

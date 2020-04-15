@@ -1,0 +1,25 @@
+package com.reactiveworks.ipl.controllers.exceptions;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.reactiveworks.ipl.controllers.exceptions.response.ErrorResponse;
+
+@ControllerAdvice
+public class CustomExceptionHandler extends ResponseEntityExceptionHandler{
+	@ExceptionHandler(MatchResourceNotAvailableException.class)
+	public final ResponseEntity<ErrorResponse> handleUserNotFoundException(MatchResourceNotAvailableException exp) {
+        List<String> details = new ArrayList<>();
+        System.out.println(exp.getLocalizedMessage());
+        details.add(exp.getLocalizedMessage());
+        ErrorResponse error = new ErrorResponse("Record Not Found", details);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+}

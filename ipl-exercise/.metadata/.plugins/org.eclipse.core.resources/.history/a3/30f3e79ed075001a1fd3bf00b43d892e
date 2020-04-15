@@ -1,0 +1,5 @@
+package com.reactiveworks.ipl.repository;
+
+public interface MatchesRepository {
+
+}

@@ -1,0 +1,10 @@
+package com.reactiveworks.ipl;
+
+public class IplApplication {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

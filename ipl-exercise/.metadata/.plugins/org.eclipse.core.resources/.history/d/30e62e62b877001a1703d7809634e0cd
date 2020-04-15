@@ -1,0 +1,213 @@
+package com.reactiveworks.ipl.service;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.reactiveworks.ipl.model.Delivery;
+import com.reactiveworks.ipl.model.Match;
+import com.reactiveworks.ipl.repository.DeliveriesRepository;
+import com.reactiveworks.ipl.repository.MatchesRepository;
+import com.reactiveworks.ipl.service.exceptions.DeliveryNotFoundException;
+import com.reactiveworks.ipl.service.exceptions.MatchNotFoundException;
+
+/**
+ * Provides ipl information service.
+ */
+@Service
+public class IPLService {
+	private Logger LOGGER_OBJ = LoggerFactory.getLogger(IPLService.class);
+
+	@Autowired
+	private MatchesRepository matchesRepository;
+
+	@Autowired
+	private DeliveriesRepository deliveriesRepository;
+
+	/**
+	 * gets the matches details which were played in the given season.
+	 * 
+	 * @param season season for which matches are required.
+	 * @return the list of matches played in the season
+	 * @throws MatchNotFoundException when match is not found.
+	 */
+	public List<Match> getMatchDetails(int season) throws MatchNotFoundException {
+		LOGGER_OBJ.debug("execution of getMatchDetails() started");
+		List<Match> matches = matchesRepository.findBySeason(season);
+		if (matches.size() == 0) {
+			LOGGER_OBJ.error("service");
+			throw new MatchNotFoundException("no matches were played in the season " + season);
+		}
+//		List<GetResponse> response=new ArrayList<GetResponse>();
+//		matches.stream().map(m->{
+//			GetResponse res=new GetResponse();
+//			res.setCity(m.getCity());
+//			res.setDate(m.getDate());
+//			res.setTeam1(m.getTeam1());
+//			res.setTeam2(m.getTeam2());
+//			return res;
+//		}).forEach(response::add);
+		LOGGER_OBJ.debug("execution of getMatchDetails() completed");
+		return matches;
+	}
+
+	/**
+	 * gets all the matches from the database.
+	 * 
+	 * @param pageNo   number of the page to be displayed.
+	 * @param pageSize number of matches to be displayed in the page.
+	 * @return the list of matches.
+	 * @throws MatchNotFoundException when the matches are not available.
+	 */
+	public List<Match> getAllMatchDetails(int pageNo, int pageSize) throws MatchNotFoundException {
+		LOGGER_OBJ.debug("execution of getAllMatchDetails() started");
+		if (pageNo > 0) {
+			pageNo -= 1;
+		}
+		List<Match> matches = null;
+		Pageable paging = PageRequest.of(pageNo, pageSize);
+		Page<Match> pagedResult = matchesRepository.findAll(paging);
+		if (pagedResult.hasContent() == false) {
+			LOGGER_OBJ.error("matches are not available ");
+			throw new MatchNotFoundException("matches are not available ");
+		}
+		matches = pagedResult.getContent();
+		LOGGER_OBJ.debug("execution of getAllMatchDetails() completed");
+		return matches;
+	}
+
+	/**
+	 * gets match with the given id from the database.
+	 * 
+	 * @param matchId id of the match to be fetched from the database.
+	 * @return the match with the given id from the database.
+	 * @throws MatchNotFoundException when match with the given id is not available.
+	 */
+	public Match getMatchById(int matchId) throws MatchNotFoundException {
+		LOGGER_OBJ.debug("execution of getAllMatchDetails() started");
+		Match match = null;
+		match = matchesRepository.findById(matchId).orElse(null);
+		if (match == null) {
+			throw new MatchNotFoundException("match with id " + matchId + " is not available ");
+		}
+
+		LOGGER_OBJ.debug("execution of getAllMatchDetails() completed");
+		return match;
+	}
+
+	/**
+	 * inserts match into the database.
+	 * 
+	 * @param match match object to be inserted into the database.
+	 */
+	public void insertMatchDetails(Match match) {
+		LOGGER_OBJ.debug("execution of insertMatchDetails() started");
+		List<Delivery> deliveries = getDeliveriesById(match.getMatchId());
+		if (deliveries.size() != 0) {
+			int team1Runs = deliveries.stream().filter(d -> d.getInning() == 1).mapToInt(d -> d.getTotalRuns()).sum();
+			int team2Runs = deliveries.stream().filter(d -> d.getInning() == 2).mapToInt(d -> d.getTotalRuns()).sum();
+			if (team1Runs > team2Runs) {
+				match.setWinner(match.getTeam1());
+			} else {
+				match.setWinner(match.getTeam2());
+			}
+
+		}
+		matchesRepository.save(match);
+		// add code for finding winner
+
+		LOGGER_OBJ.debug("execution of insertMatchDetails() completed");
+
+	}
+
+	/**
+	 * updates the match details.
+	 * 
+	 * @param match to be updated.
+	 */
+	public void updateMatch(Match match) {
+		LOGGER_OBJ.debug("execution of updateMatch() started");
+		matchesRepository.save(match);
+		LOGGER_OBJ.debug("execution of updateMatch() completed");
+
+	}
+
+	/**
+	 * deletes the match from the database.
+	 * 
+	 * @param matchId id of the to be deleted.
+	 * @throws MatchNotFoundException match with the id is not available.
+	 */
+	public void deleteMatch(int matchId) throws MatchNotFoundException {
+		LOGGER_OBJ.debug("execution of deleteMatch() started");
+		getMatchById(matchId);
+		matchesRepository.deleteById(matchId);
+		LOGGER_OBJ.debug("execution of deleteMatch() completed");
+	}
+
+	public List<Delivery> getDeliveries(int pageNo, int pageSize) throws DeliveryNotFoundException {
+		if (pageNo > 0) {
+			pageNo -= 1;
+		}
+		Pageable paging = PageRequest.of(pageNo, pageSize);
+		Page<Delivery> pagedResult = deliveriesRepository.findAll(paging);
+		if (pagedResult.hasContent()) {
+			return pagedResult.getContent();
+		} else {
+			throw new DeliveryNotFoundException("deliveries are not available.");
+		}
+	}
+
+	public Delivery getDelivery(int matchId, int inning1, String battingTeam) {
+		LOGGER_OBJ.debug("execution of getDelivery() started");
+		Delivery delivery = deliveriesRepository.findByMatchIdAndInning(matchId, inning1);
+		// deliveriesRepository.findAllById(matchId)
+		LOGGER_OBJ.debug("execution of getDelivery() completed");
+		return delivery;
+
+	}
+
+	public List<Delivery> getDeliveriesById(int matchId) {
+		LOGGER_OBJ.debug("execution of getDeliveriesById() started");
+		List<Delivery> deliveries = deliveriesRepository.findAllByMatchId(matchId);
+		LOGGER_OBJ.debug("execution of getDeliveriesById() completed");
+		return deliveries;
+	}
+
+	public Delivery getDeliveryById(int deliveryId) {
+		LOGGER_OBJ.debug("execution of getDeliveryById() started");
+		Delivery delivery = deliveriesRepository.findById(deliveryId).orElse(null);
+		// exception handling
+		LOGGER_OBJ.debug("execution of getDeliveryById() completed");
+		return delivery;
+	}
+
+	public void addDelivery(Delivery delivery) {
+
+		LOGGER_OBJ.debug("execution of addDelivery() started");
+		deliveriesRepository.save(delivery);
+		LOGGER_OBJ.debug("execution of addDelivery() completed");
+
+	}
+
+	public void updateDelivery(int deliveryId, Delivery delivery) {
+		LOGGER_OBJ.debug("execution of updateDelivery() started");
+		deliveriesRepository.save(delivery);
+		LOGGER_OBJ.debug("execution of updateDelivery() completed");
+
+	}
+
+	public void deleteDelivery(int deliveryId) {
+
+		LOGGER_OBJ.debug("execution of updateDelivery() started");
+		deliveriesRepository.deleteById(deliveryId);
+		LOGGER_OBJ.debug("execution of updateDelivery() completed");
+	}
+
+}

@@ -1,0 +1,87 @@
+package com.reactiveworks.ipl.controllers;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.reactiveworks.ipl.model.Delivery;
+import com.reactiveworks.ipl.service.IPLService;
+import com.reactiveworks.ipl.service.exceptions.DeliveryNotFoundException;
+import com.reactiveworks.ipl.service.exceptions.MatchNotFoundException;
+
+/**
+ * controller class for the match resource.
+ */
+@RestController
+@RequestMapping("/deliveries")
+public class DeliveryResourceController {
+
+	private static Logger LOGGER_OBJ = LoggerFactory.getLogger(DeliveryResourceController.class);
+	@Autowired
+	private IPLService iplService;
+
+	@GetMapping
+	public ResponseEntity<String> getWinningTeamName(@RequestParam(defaultValue = "0") int matchId,
+			@RequestParam(defaultValue = "0") int inning1, @RequestParam(defaultValue = "null") String battingTeam)
+			throws DeliveryNotFoundException, MatchNotFoundException {
+		LOGGER_OBJ.debug("execution of the getDeliveries() started");
+		String winningTeamName = iplService.getWinningTeamName(matchId, inning1, battingTeam);
+		LOGGER_OBJ.debug("execution of the getDeliveries() completed");
+		return new ResponseEntity<String>(winningTeamName, HttpStatus.OK);
+	}
+
+	@GetMapping("/{deliveryId}")
+	public ResponseEntity<Delivery> getDelivery(@PathVariable int deliveryId) throws DeliveryNotFoundException {
+		LOGGER_OBJ.debug("execution of the getDelivery() started");
+		Delivery delivery = iplService.getDeliveryById(deliveryId);
+		LOGGER_OBJ.debug("execution of the getDelivery() completed");
+		return new ResponseEntity<Delivery>(delivery, HttpStatus.OK);
+	}
+
+	@PostMapping
+	public ResponseEntity<Link> insertDelivery(@RequestBody Delivery delivery) throws DeliveryNotFoundException {
+		LOGGER_OBJ.debug("execution of the insertDeliveries() started");
+		iplService.addDelivery(delivery);
+		int num;
+		try {
+			num = iplService.getDeliveries(0, 1).size();
+		} catch (DeliveryNotFoundException e) {
+			num = 0;
+		}
+		Link link = WebMvcLinkBuilder
+				.linkTo(WebMvcLinkBuilder.methodOn(DeliveryResourceController.class).getDelivery(++num))
+				.withSelfRel();
+		LOGGER_OBJ.debug("execution of the insertDeliveries() completed");
+		return new ResponseEntity<Link>(link, HttpStatus.CREATED);
+	}
+
+	@PutMapping("/{deliveryId}")
+	public ResponseEntity<HttpStatus> updateDelivery(@PathVariable int deliveryId, @RequestBody Delivery delivery) {
+		LOGGER_OBJ.debug("execution of the updateDelivery() started");
+		iplService.updateDelivery(deliveryId, delivery);
+		LOGGER_OBJ.debug("execution of the updateDelivery() completed");
+		return new ResponseEntity<HttpStatus>(HttpStatus.OK);
+	}
+
+	@DeleteMapping("/{deliveryId}")
+	public ResponseEntity<HttpStatus> deleteDelivery(@PathVariable int deliveryId) {
+		LOGGER_OBJ.debug("execution of the deleteDelivery() started");
+		iplService.deleteDelivery(deliveryId);
+		LOGGER_OBJ.debug("execution of the deleteDelivery() completed");
+		return new ResponseEntity<HttpStatus>(HttpStatus.OK);
+	}
+
+}

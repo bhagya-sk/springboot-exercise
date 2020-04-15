@@ -1,0 +1,5 @@
+package com.reactiveworks.ipl.controllers.exceptions.response;
+
+public class ErrorResponse {
+
+}

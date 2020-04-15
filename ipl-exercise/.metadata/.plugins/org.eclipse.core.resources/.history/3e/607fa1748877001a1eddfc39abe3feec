@@ -1,0 +1,20 @@
+package com.reactiveworks.ipl;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class A {
+	@Id
+	@Column(name = "aId")
+	private int aId;
+	public int getaId() {
+		return aId;
+	}
+	public void setaId(int aId) {
+		this.aId = aId;
+	}
+	
+	
+}

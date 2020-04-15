@@ -1,0 +1,5 @@
+package com.reactiveworks.ipl.response;
+
+public class GetResponse {
+
+}

@@ -1,0 +1,26 @@
+package com.reactiveworks.ipl;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+@Entity
+public class B {
+	@Id
+	private int bId;
+    @OneToMany(cascade =CascadeType.REMOVE,targetEntity = A.class,mappedBy = "aId" )
+	private int aId;
+	public int getbId() {
+		return bId;
+	}
+
+	public void setbId(int bId) {
+		this.bId = bId;
+	}
+
+	
+	
+	
+
+}

@@ -1,0 +1,5 @@
+package com.reactiveworks.ipl.service.exceptions;
+
+public class DeliveryNotFoundException extends Exception {
+
+}

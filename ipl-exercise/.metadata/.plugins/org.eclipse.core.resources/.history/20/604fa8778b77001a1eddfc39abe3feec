@@ -1,0 +1,27 @@
+package com.reactiveworks.ipl;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
+@Entity
+public class A {
+	@Id
+	@Column(name = "aId")
+	private int aId;
+    @OneToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "b_id", nullable = false)
+	private B b;
+	public int getaId() {
+		return aId;
+	}
+	public void setaId(int aId) {
+		this.aId = aId;
+	}
+	
+	
+}

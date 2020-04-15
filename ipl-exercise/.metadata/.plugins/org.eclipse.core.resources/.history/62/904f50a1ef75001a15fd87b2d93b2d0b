@@ -1,0 +1,10 @@
+package com.reactiveworks.ipl.repository;
+
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import com.reactiveworks.ipl.model.Match;
+
+public interface MatchesRepository extends PagingAndSortingRepository<Match, Integer>{
+
+	public Match findBySeason(int season);
+}

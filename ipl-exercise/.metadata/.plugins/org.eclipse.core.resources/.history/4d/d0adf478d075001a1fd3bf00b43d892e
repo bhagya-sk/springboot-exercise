@@ -1,0 +1,16 @@
+package com.reactiveworks.ipl.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import com.reactiveworks.ipl.model.Delivery;
+
+public interface DeliveryRepository extends PagingAndSortingRepository<Delivery, String> {
+
+
+
+}

@@ -1,0 +1,16 @@
+package com.reactiveworks.ipl;
+
+import javax.persistence.Id;
+
+public class A {
+	@Id
+	private int aId;
+	public int getaId() {
+		return aId;
+	}
+	public void setaId(int aId) {
+		this.aId = aId;
+	}
+	
+	
+}

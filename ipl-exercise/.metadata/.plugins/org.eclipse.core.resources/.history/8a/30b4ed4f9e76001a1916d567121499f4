@@ -1,0 +1,5 @@
+package com.reactiveworks.ipl.controllers.exceptions;
+
+public class MatchetailsMissingException extends Exception {
+
+}
